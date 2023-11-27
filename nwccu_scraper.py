@@ -4,6 +4,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
 
 # The NWCCUScraper class is designed to scrape data from the NWCCU (Northwest Commission on Colleges and Universities) website.
 # It uses Selenium WebDriver for interacting with the website to extract data about various colleges and universities.
@@ -22,6 +23,53 @@ class NWCCUScraper:
 
     # Main method to start the web scraping process.
     def scrape(self):
+        self.driver.get('https://nwccu.org/member-institutions/directory/')
+        time.sleep(3)  # Waits for the page to load completely.
+
+        # Fetch the state filter links
+        state_links = self.driver.find_elements(By.CSS_SELECTOR, '.filterBox.states.left a')
+        previous_state_link = None
+
+        # Iterate over each state link
+        for state_link in state_links:
+             # Create a new instance of ActionChains for each iteration
+            actions = ActionChains(self.driver)
+
+            # Scroll to the element
+            actions.move_to_element(state_link).perform()
+            
+            # Click the previous state link to turn off that filter (if it's not the first iteration)
+            if previous_state_link:
+                previous_state_link.click()
+                time.sleep(3)  # Wait for the filter to reset
+
+            # Extract state name
+            state_name = state_link.text.strip()
+
+            # Click the current state link to apply the filter
+            state_link.click()
+            time.sleep(3)  # Wait for the filter to be applied and the page to refresh
+
+            # Scrape the college information for the selected state
+            institution_lis = self.driver.find_elements(By.CLASS_NAME, 'institution')
+            for li in institution_lis:
+                try:
+                    college_info = self.extract_college_info(li)
+                    if college_info:
+                        # Add state information to the college data
+                        college_info['location'] = state_name
+                        self.colleges_data.append(college_info)
+                except Exception as e:
+                    print(f"Error processing element: {e}")
+
+            # Update the previous_state_link for the next iteration
+            previous_state_link = state_link
+
+        # Quits the WebDriver once scraping is complete.
+        self.driver.quit()
+
+    # Method to start the web scraping process. This runs faster since it doesn't filter by location, but also doesn't store the location of the school.
+    def scrapeFast(self):
         # Navigates to the NWCCU directory page.
         self.driver.get('https://nwccu.org/member-institutions/directory/')
         time.sleep(5)  # Waits for the page to load completely.
@@ -33,6 +81,7 @@ class NWCCUScraper:
         for li in institution_lis:
             try:
                 college_info = self.extract_college_info(li)
+                college_info['location'] = None
                 if college_info:
                     self.colleges_data.append(college_info)
             except Exception as e:

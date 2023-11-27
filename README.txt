@@ -62,7 +62,8 @@ CREATE TABLE NWCCU_Data (
     NextEvaluation NVARCHAR(255),
     DegreeLevels NVARCHAR(255),
     PublicSanction NVARCHAR(255),
-    ReasonForAccreditation NVARCHAR(MAX)
+    ReasonForAccreditation NVARCHAR(MAX),
+    Location NVARCHAR(50) NULL
 );
 
 Notes

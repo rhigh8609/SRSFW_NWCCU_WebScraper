@@ -14,8 +14,8 @@ class DatabaseManager:
     def insert_college_data(self, colleges_data):
         # SQL statement for inserting data into the NWCCU_Data table.
         insert_statement = '''
-            INSERT INTO NWCCU_Data (Name, Website, Accredited, AccreditationPeriod, Type, StatementURL, MostRecentEvaluation, NextEvaluation, DegreeLevels, PublicSanction, ReasonForAccreditation)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            INSERT INTO NWCCU_Data (Name, Website, Accredited, AccreditationPeriod, Type, StatementURL, MostRecentEvaluation, NextEvaluation, DegreeLevels, PublicSanction, ReasonForAccreditation, Location)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         '''
         # Creates a new cursor object to execute SQL commands.
         cursor = self.conn.cursor()
@@ -37,7 +37,8 @@ class DatabaseManager:
                 college['next_evaluation'],
                 college['degree_levels'],
                 college['public_sanction'],
-                college['reason_for_accreditation']
+                college['reason_for_accreditation'],
+                college['location']
             ))
 
         # Commits the current transaction to the database.
